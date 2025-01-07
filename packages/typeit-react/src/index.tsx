@@ -2,7 +2,7 @@ import React, { forwardRef, useEffect, useRef, useState } from "react";
 import { Options, default as TypeItCore } from "typeit";
 
 export interface TypeItProps {
-  as?: keyof JSX.IntrinsicElements;
+  as?: keyof HTMLElementTagNameMap;
   options?: Options;
   children?: React.ReactNode;
   getBeforeInit?: (instance: TypeItCore) => TypeItCore;
