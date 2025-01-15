@@ -1,4 +1,13 @@
-import TypeIt from "../src";
+import TypeIt from "../src/TypeIt";
+
+const instance = new TypeIt("#crazy-cursor", {
+  speed: 50,
+  strings: ["Look at this thing go!", "Is it not cool?"],
+})
+  .type("This is a test")
+  .break()
+  .type("And this is another test")
+  .go();
 
 new TypeIt("#example2", {
   speed: 50,
@@ -127,13 +136,13 @@ new TypeIt("#example13", {
   .type("Pause after!", { delay: 2000 })
   .break({ delay: 2000 })
   .type("Pause again!", { delay: 2000 })
-  .options({ speed: 500, delay: 2000 })
+  .options({ speed: 500 }, { delay: 2000 })
   .type("And again!", { delay: 2000 })
   .exec(
     function () {
       console.log("fire!");
     },
-    { delay: 2000 }
+    { delay: 2000 },
   )
   .move(-5, { delay: 2000 })
   .go();
@@ -158,7 +167,7 @@ const freezeInstance = new TypeIt("#freeze-unfreeze", {
   loop: true,
 }).go();
 
-document.querySelector("#freezeButton").addEventListener("click", () => {
+document.querySelector("#freezeButton")!.addEventListener("click", () => {
   if (freezeInstance.is("frozen")) {
     freezeInstance.unfreeze();
   } else {
@@ -190,6 +199,7 @@ new TypeIt("#form-input", {
   .type("friend.")
   .go();
 
+// @ts-ignore
 window.heroInstance = new TypeIt("#hero", {
   speed: 50,
   startDelay: 900,
@@ -197,7 +207,6 @@ window.heroInstance = new TypeIt("#hero", {
   .type("the mot versti", { delay: 100 })
   .move(-8, { delay: 100 })
   .type("s", { delay: 400 })
-
   .move(null, { to: "START", instant: false, delay: 300 })
   .move(1, { delay: 200 })
   .delete(1)

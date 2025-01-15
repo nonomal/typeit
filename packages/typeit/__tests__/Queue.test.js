@@ -14,10 +14,12 @@ describe("add()", () => {
     let items = queue.getItems();
     expect(items[1].func.name).toEqual("first");
     expect(items[2].func.name).toEqual("second");
+    expect(items[1].shouldPauseCursor).toBeDefined();
+    expect(items[2].shouldPauseCursor).toBeDefined();
   });
 
   test("It should add multiple steps passed at once.", () => {
-    let func = jest.fn();
+    let func = vi.fn();
     queue.add([{ func }, { func }, { func }]);
 
     let items = queue.getItems();
@@ -51,7 +53,17 @@ test("It should set initial steps properly.", () => {
 
   let q1 = new Queue(items);
 
-  expect(q1.getItems()).toEqual([{}, {}, {}]);
+  expect(q1.getItems()).toEqual([
+    {
+      shouldPauseCursor: expect.anything(),
+    },
+    {
+      shouldPauseCursor: expect.anything(),
+    },
+    {
+      shouldPauseCursor: expect.anything(),
+    },
+  ]);
 });
 
 test("It should only return non-done items.", () => {
@@ -72,4 +84,17 @@ test("It should return no items if all are done.", () => {
   let q1 = new Queue(items);
 
   expect(q1.getItems()).toEqual([]);
+});
+
+describe("set()", () => {
+  it("should build queue item correctly", () => {
+    let items = [{ done: true }, { done: true }, { done: true }];
+
+    let q1 = new Queue(items);
+
+    q1.set(0, { delay: 3000 });
+
+    let firstItem = q1.getItems(true)[0];
+    expect(firstItem.shouldPauseCursor).toBeDefined();
+  });
 });

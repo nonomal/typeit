@@ -1,8 +1,8 @@
-import TypeIt from "../../src";
+import TypeIt from "../../src/TypeIt.ts";
 import * as wait from "../../src/helpers/wait";
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe("deleting fires correctly", () => {
@@ -15,7 +15,9 @@ describe("deleting fires correctly", () => {
       strings: "abc<strong>def</strong>ghi",
       afterComplete: () => {
         expect(el.innerHTML).toEqual(
-          'abc<span class="ti-cursor with-delay">|</span>'
+          expect.stringMatching(
+            /abc<span class="ti-cursor" data-ti-animation-id=".+">|<\/span>/,
+          ),
         );
         done();
       },
@@ -33,7 +35,9 @@ describe("deleting fires correctly", () => {
       strings: "abc<strong>def</strong>ghi",
       afterComplete: () => {
         expect(el.innerHTML).toEqual(
-          'abc<strong>def</strong><span class="ti-cursor with-delay">|</span>'
+          expect.stringMatching(
+            /abc<strong>def<\/strong><span class="ti-cursor" data-ti-animation-id=".+">|<\/span>/,
+          ),
         );
         done();
       },
@@ -51,7 +55,7 @@ describe("timeouts fire correctly", () => {
       <span id="element"></span>
     </div>`;
 
-    waitSpy = jest.spyOn(wait, "default");
+    waitSpy = vi.spyOn(wait, "default");
   });
 
   test("Executes correctly when deletion is not instant.", (done) => {
@@ -107,7 +111,9 @@ describe("cursor has been moved", () => {
       speed: 0,
       afterComplete: () => {
         expect(document.body.querySelector("#element").innerHTML).toEqual(
-          'abc <strong>def</strong> g<em><span class="ti-cursor with-delay">|</span>jkl</em> mno'
+          expect.stringMatching(
+            /abc <strong>def<\/strong> g<em><span class="ti-cursor" data-ti-animation-id=".+">|<\/span>jkl<\/em> mno/,
+          ),
         );
         done();
       },
@@ -123,7 +129,9 @@ describe("cursor has been moved", () => {
       speed: 0,
       afterComplete: () => {
         expect(document.body.querySelector("#element").innerHTML).toEqual(
-          'abc <span class="ti-cursor with-delay">|</span> mno'
+          expect.stringMatching(
+            /^abc <span class=\"ti-cursor\" data-ti-animation-id=\".+\">|<\/span> mno/,
+          ),
         );
         done();
       },

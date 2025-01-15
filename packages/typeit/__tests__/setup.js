@@ -1,4 +1,25 @@
-global.setHTML = (html, shouldReturn = false) => {
+beforeEach(() => {
+  let animation = {
+    pause: () => {},
+    play: () => {},
+    effect: {
+      getComputedTiming: () => {
+        return {};
+      },
+      getKeyframes: () => [],
+    },
+    cancel: () => {},
+    currentTime: 0,
+  };
+
+  globalThis.HTMLElement.prototype.animate = () => animation;
+  globalThis.HTMLElement.prototype.getAnimations = () => [animation];
+  globalThis.requestAnimationFrame = (cb) => {
+    cb();
+  };
+});
+
+globalThis.setHTML = (html, shouldReturn = false) => {
   let domString = String.raw({ raw: html })
     .replace(/(\r\n|\n|\r)/gm, "")
     .replace(/>\s+</g, "><");
@@ -10,7 +31,7 @@ global.setHTML = (html, shouldReturn = false) => {
   document.body.innerHTML = domString;
 };
 
-global.verifyQueue = ({ queue, totalItems, totalTypeableItems }) => {
+globalThis.verifyQueue = ({ queue, totalItems, totalTypeableItems }) => {
   const queueItems = queue.getItems();
   const typeableItems = queueItems.filter((i) => i.typeable);
 
@@ -18,6 +39,23 @@ global.verifyQueue = ({ queue, totalItems, totalTypeableItems }) => {
   expect(typeableItems).toHaveLength(totalTypeableItems);
 };
 
-jest.fn().constructor.prototype.times = function () {
+vi.fn().constructor.prototype.times = function () {
   return this.mock.calls.length;
+};
+
+globalThis.makeMocks = () => {
+  const iterator = {
+    next() {
+      return {
+        done: false,
+        value: vi.fn(),
+      };
+    },
+
+    [Symbol.iterator]() {
+      return iterator;
+    },
+  };
+
+  return iterator;
 };

@@ -1,14 +1,27 @@
 import asArray from "./helpers/asArray";
 import { QueueItem } from "./types";
 
-let Queue = function (initialItems: QueueItem[]) {
+export interface QueueI {
+  add: (steps: QueueItem[] | QueueItem) => typeof Queue;
+  set: (index: number, item: QueueItem) => void;
+  wipe: () => void;
+  done: (key: Symbol, shouldDestroy?: boolean) => void;
+  reset: () => void;
+  destroy: (key: Symbol) => void;
+  getItems: (all?: boolean) => QueueItem[];
+  getQueue: () => Map<Symbol, QueueItem>;
+  getTypeable: () => QueueItem[];
+  getPendingQueueItems: () => QueueItem[];
+}
+
+let Queue = function (initialItems: QueueItem[]): QueueI {
   /**
    * Add a single or several steps onto the `waiting` queue.
    */
   let add = function (steps: QueueItem[] | QueueItem): typeof Queue {
-    asArray<QueueItem>(steps).forEach((step) =>
-      _q.set(Symbol(step.char?.innerText), { ...step })
-    );
+    asArray<QueueItem>(steps).forEach((step) => {
+      return _q.set(Symbol(step.char?.innerText), buildQueueItem({ ...step }));
+    });
 
     return this;
   };
@@ -22,7 +35,15 @@ let Queue = function (initialItems: QueueItem[]) {
   let set = function (index: number, item: QueueItem): void {
     let keys = [..._q.keys()];
 
-    _q.set(keys[index], item);
+    _q.set(keys[index], buildQueueItem(item));
+  };
+
+  let buildQueueItem = (queueItem: QueueItem): QueueItem => {
+    queueItem.shouldPauseCursor = function () {
+      return Boolean(this.typeable || this.cursorable || this.deletable);
+    };
+
+    return queueItem;
   };
 
   /**
@@ -40,6 +61,17 @@ let Queue = function (initialItems: QueueItem[]) {
   let getQueue = () => _q;
   let rawValues = (): QueueItem[] => Array.from(_q.values());
   let destroy = (key: Symbol) => _q.delete(key);
+  let getPendingQueueItems = (): QueueItem[] => {
+    const pending = [];
+
+    for (let [, value] of getQueue()) {
+      if (!value.done) {
+        pending.push(value);
+      }
+    }
+
+    return pending;
+  };
 
   /**
    * Retrieve all items that are still eligible to be executed. By default, only the
@@ -48,7 +80,7 @@ let Queue = function (initialItems: QueueItem[]) {
   let getItems = (all: boolean = false): QueueItem[] =>
     all ? rawValues() : rawValues().filter((i) => !i.done);
 
-  let done = (key: Symbol, shouldDestroy: boolean = false) => 
+  let done = (key: Symbol, shouldDestroy: boolean = false) =>
     shouldDestroy ? _q.delete(key) : (_q.get(key).done = true);
 
   let _q = new Map();
@@ -59,12 +91,13 @@ let Queue = function (initialItems: QueueItem[]) {
     add,
     set,
     wipe,
+    done,
     reset,
     destroy,
-    done,
     getItems,
     getQueue,
     getTypeable,
+    getPendingQueueItems,
   };
 };
 

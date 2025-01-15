@@ -1,35 +1,53 @@
-export type TypeItInstance = (
-  element: Element | string,
-  options: Options
-) => void;
-
 export type Character = {
-  node: Element | null;
+  node: El | null;
   content: string | Node;
 };
 
-export type Options = {
+export interface CursorAnimationOptions {
+  frames?: AnimationKeyFrame[];
+  options?: Partial<AnimationEffectTiming>;
+}
+
+export interface CursorOptions {
+  autoPause?: boolean;
+  autoPauseDelay?: number;
+  animation?: CursorAnimationOptions;
+}
+
+export interface Options {
   breakLines?: boolean;
-  cursor?: boolean;
   cursorChar?: string;
+  cursor?: CursorOptions | boolean;
+
+  // @todo: Remove in next major release.
   cursorSpeed?: number;
   deleteSpeed?: null | number;
   html?: boolean;
   lifeLike?: boolean;
   loop?: boolean;
-  loopDelay?: number;
-  nextStringDelay?: number;
+  loopDelay?: number | number[];
+
+  // @todo Rename to something like "betweenStringDelay"
+  nextStringDelay?: number | number[];
   speed?: number;
   startDelay?: number;
   startDelete?: boolean;
-  strings?: string[];
+  strings?: string[] | string;
   waitUntilVisible?: boolean;
   beforeString?: Function;
   afterString?: Function;
   beforeStep?: Function;
   afterStep?: Function;
   afterComplete?: Function;
-};
+}
+
+export interface Statuses {
+  started: boolean;
+  completed: boolean;
+  frozen: boolean;
+  destroyed: boolean;
+  firing: boolean;
+}
 
 export type ActionOpts = Options & {
   to?: Sides;
@@ -42,16 +60,28 @@ export type QueueItem = {
   func?: () => any;
   delay?: number;
   char?: any;
+
+  // A queue item that can be visibly 'typed' to the
+  // screen, including those queued with ".type()" and ".break()"
   typeable?: boolean;
+
   deletable?: boolean;
+
+  // An explicit indicator that a queue item should pause
+  // the cursor animation during execution.
+  cursorable?: boolean;
+
+  // An item should pause the cursor of it's
+  // EITHER "typeable," "cusorable," or "deleteable."
+  shouldPauseCursor?: () => boolean;
 };
 
-export type Element = HTMLElement &
-  CharacterData &
-  Node &
-  ChildNode & {
-    value: string | number;
-    originalParent?: HTMLElement;
-  };
+export type QueueMapPair = [Symbol, QueueItem];
+
+export type El = (HTMLElement | HTMLInputElement) & {
+  originalParent?: HTMLElement;
+};
+
+// export type NewEl = (HTMLElement | HTMLInputElement) & { originalParent?: HTMLElement };
 
 export type Sides = "START" | "END";
